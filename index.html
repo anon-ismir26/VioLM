@@ -4,58 +4,55 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>VioLM: A Neural Language Model for Violin Synthesis with Articulation</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;1,8..60,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --cream: #f7f3ee;
-      --warm-white: #faf8f5;
-      --ink: #1a1612;
-      --ink-light: #3d3530;
-      --muted: #7a6f66;
-      --rule: #d4c9be;
-      --accent: #8b3a2a;
-      --accent-light: #c4624f;
-      --tag-bg: #ede8e2;
-      --player-bg: #eee8e0;
-      --shadow: 0 2px 16px rgba(26,22,18,0.08);
+      --bg: #ffffff;
+      --surface: #fafafa;
+      --ink: #1a1a1a;
+      --ink-light: #333333;
+      --muted: #6b6b6b;
+      --rule: #e5e5e5;
+      --accent: #0b5fa5;
+      --accent-hover: #084a82;
+      --tag-bg: #eef3f9;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: var(--cream);
+      background: var(--bg);
       color: var(--ink);
-      font-family: 'Source Serif 4', Georgia, serif;
-      font-size: 17px;
-      line-height: 1.7;
+      font-family: Charter, 'Iowan Old Style', 'Source Serif Pro', Georgia, serif;
+      font-size: 16.5px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     /* ── Header ── */
     header {
-      background: var(--warm-white);
       border-bottom: 1px solid var(--rule);
-      padding: 56px 24px 48px;
+      padding: 56px 24px 44px;
       text-align: center;
     }
 
     .venue-tag {
       display: inline-block;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
       font-size: 11px;
-      letter-spacing: 0.18em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--accent);
       background: var(--tag-bg);
-      border: 1px solid var(--rule);
-      padding: 4px 12px;
-      border-radius: 2px;
-      margin-bottom: 28px;
+      padding: 4px 10px;
+      border-radius: 3px;
+      margin-bottom: 24px;
     }
 
     h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(26px, 4vw, 42px);
-      font-weight: 600;
+      font-family: inherit;
+      font-size: clamp(26px, 4vw, 38px);
+      font-weight: 700;
       line-height: 1.25;
       max-width: 820px;
       margin: 0 auto 16px;
@@ -64,75 +61,59 @@
 
     h1 em {
       font-style: italic;
-      color: var(--accent);
+      font-weight: 700;
     }
 
     .authors {
-      font-family: 'Source Serif 4', serif;
       font-size: 15px;
-      color: var(--muted);
-      font-style: italic;
-      margin-bottom: 8px;
+      color: var(--ink-light);
+      margin-bottom: 6px;
     }
 
     .blind-note {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
+      font-size: 13px;
       color: var(--muted);
-      letter-spacing: 0.06em;
     }
 
     .site-lead {
-      font-family: 'Source Serif 4', serif;
       font-size: 14.5px;
-      font-style: italic;
       color: var(--ink-light);
       max-width: 640px;
-      margin: 22px auto 0;
+      margin: 20px auto 0;
       line-height: 1.6;
     }
 
     /* ── Layout ── */
     main {
-      max-width: 960px;
+      max-width: 920px;
       margin: 0 auto;
-      padding: 0 24px 80px;
+      padding: 0 24px 72px;
     }
 
     /* ── Section headings ── */
     .section {
-      margin-top: 64px;
+      margin-top: 56px;
     }
 
     .section-rule {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--rule);
     }
 
     .section-rule h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 22px;
-      font-weight: 600;
-      white-space: nowrap;
+      font-family: inherit;
+      font-size: 20px;
+      font-weight: 700;
       color: var(--ink);
-    }
-
-    .section-rule::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--rule);
+      letter-spacing: -0.01em;
     }
 
     /* ── Abstract ── */
     .abstract-box {
-      background: var(--warm-white);
-      border-left: 3px solid var(--accent);
-      padding: 24px 28px;
+      padding: 0 4px;
       font-size: 15.5px;
-      line-height: 1.75;
+      line-height: 1.7;
       color: var(--ink-light);
     }
 
@@ -142,36 +123,19 @@
       margin-top: 8px;
     }
 
-    .figure-placeholder {
-      background: var(--player-bg);
-      border: 2px dashed var(--rule);
-      border-radius: 4px;
-      padding: 60px 32px;
-      color: var(--muted);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .figure-placeholder svg {
-      opacity: 0.35;
-    }
-
     .figure-img {
       max-width: 100%;
       border: 1px solid var(--rule);
-      border-radius: 4px;
-      box-shadow: var(--shadow);
+      border-radius: 3px;
     }
 
     figcaption {
       margin-top: 12px;
-      font-size: 14px;
+      font-size: 13.5px;
       color: var(--muted);
-      font-style: italic;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     /* ── Audio tables ── */
@@ -187,16 +151,16 @@
     }
 
     thead tr {
-      border-bottom: 2px solid var(--ink);
+      border-bottom: 1px solid var(--ink);
     }
 
     thead th {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
+      font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+      font-size: 11px;
       letter-spacing: 0.06em;
       font-weight: 500;
       text-transform: uppercase;
-      padding: 10px 14px;
+      padding: 10px 12px;
       text-align: center;
       color: var(--muted);
     }
@@ -208,11 +172,10 @@
 
     tbody tr {
       border-bottom: 1px solid var(--rule);
-      transition: background 0.15s;
     }
 
     tbody tr:hover {
-      background: var(--warm-white);
+      background: var(--surface);
     }
 
     tbody tr:last-child {
@@ -220,16 +183,13 @@
     }
 
     tbody td {
-      padding: 10px 14px;
+      padding: 10px 12px;
       text-align: center;
       vertical-align: middle;
     }
 
     tbody td:first-child {
       text-align: left;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      color: var(--ink);
       white-space: nowrap;
     }
 
@@ -240,17 +200,15 @@
     }
 
     .condition-name {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      font-weight: 500;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
       color: var(--ink);
     }
 
     .condition-desc {
-      font-family: 'Source Serif 4', serif;
-      font-size: 12px;
+      font-size: 12.5px;
       color: var(--muted);
-      font-style: italic;
     }
 
     /* highlight our model */
@@ -259,72 +217,17 @@
     }
 
     tr.ours td:first-child::before {
-      content: '★ ';
+      content: '★';
       color: var(--accent);
-      font-size: 11px;
-    }
-
-    /* ── Audio player slot ── */
-    .audio-slot {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
+      font-size: 15px;
+      margin-right: 6px;
+      vertical-align: -1px;
     }
 
     audio {
       width: 130px;
       height: 32px;
       accent-color: var(--accent);
-    }
-
-    /* Placeholder when no audio yet */
-    .audio-placeholder {
-      width: 130px;
-      height: 32px;
-      background: var(--player-bg);
-      border: 1px dashed var(--rule);
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      color: var(--muted);
-      letter-spacing: 0.06em;
-    }
-
-    /* ── Sub-section label ── */
-    .sub-label {
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
-      font-size: 17px;
-      color: var(--ink-light);
-      margin: 36px 0 14px;
-      padding-left: 2px;
-    }
-
-    /* ── Footer ── */
-    footer {
-      border-top: 1px solid var(--rule);
-      padding: 32px 24px;
-      text-align: center;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: 0.06em;
-    }
-
-    /* ── Note box ── */
-    .note {
-      background: var(--tag-bg);
-      border: 1px solid var(--rule);
-      border-radius: 3px;
-      padding: 14px 18px;
-      font-size: 14px;
-      color: var(--muted);
-      margin-top: 16px;
-      font-style: italic;
     }
 
     /* ── References ── */
@@ -337,24 +240,20 @@
 
     .refs li {
       counter-increment: ref;
-      display: grid;
-      grid-template-columns: 36px 1fr;
-      gap: 8px;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--rule);
+      padding-left: 2.6em;
+      text-indent: -2.6em;
+      margin-bottom: 12px;
       font-size: 14.5px;
-      line-height: 1.65;
+      line-height: 1.55;
       color: var(--ink-light);
     }
 
-    .refs li:last-child { border-bottom: none; }
+    .refs li:last-child { margin-bottom: 0; }
 
     .refs li::before {
-      content: "[" counter(ref) "]";
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
+      content: "[" counter(ref) "] ";
       color: var(--muted);
-      padding-top: 2px;
+      margin-right: 4px;
     }
 
     .refs em { font-style: italic; color: var(--ink); }
@@ -362,17 +261,28 @@
     .refs a {
       color: var(--accent);
       text-decoration: none;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
+      word-break: break-word;
     }
 
-    .refs a:hover { text-decoration: underline; }
+    .refs a:hover {
+      color: var(--accent-hover);
+      text-decoration: underline;
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 24px;
+      text-align: center;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
 
     /* ── Responsive ── */
     @media (max-width: 600px) {
       audio { width: 100px; }
-      .audio-placeholder { width: 100px; }
       h1 { font-size: 22px; }
+      main { padding: 0 16px 48px; }
     }
   </style>
 </head>
@@ -380,10 +290,10 @@
 
 <header>
   <div class="venue-tag">ISMIR 2026 · Double-Blind Submission</div>
-  <h1>VioLM: A Neural Language Model for<br><em>Violin Synthesis</em> with Articulation</h1>
+  <h1>🎻 VioLM: A Neural Language Model for<br><em>Violin Synthesis</em> with Articulation</h1>
   <p class="authors">Anonymous Authors</p>
   <p class="blind-note">Anonymous Affiliations &nbsp;·&nbsp; anonymous@ismir.net</p>
-  <p class="site-lead">Accompanying website for the paper submission — audio examples and qualitative comparisons.</p>
+  <p class="site-lead">Accompanying website for the paper submission: audio examples and qualitative comparisons.</p>
 </header>
 
 <main>
@@ -584,6 +494,9 @@
       </li>
       <li>
         H. Zhang, J. Tang, S. R. M. Rafee, S. Dixon, and G. Fazekas, &ldquo;ATEPP: A dataset of automatically transcribed expressive piano performance,&rdquo; in <em>Proc. Int. Soc. Music Inf. Retrieval Conf. (ISMIR)</em>, Bengaluru, India, 2022, pp. 446&ndash;453. <a href="https://doi.org/10.5281/zenodo.7342764">doi:10.5281/zenodo.7342764</a>
+      </li>
+      <li>
+        A. D&eacute;fossez, J. Copet, G. Synnaeve, and Y. Adi, &ldquo;High fidelity neural audio compression,&rdquo; <em>Transactions on Machine Learning Research (TMLR)</em>, 2023.
       </li>
     </ol>
   </section>
