@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VioLM: A Neural Language Model for Violin Synthesis with Articulation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;1,8..60,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --cream: #f7f3ee;
+      --warm-white: #faf8f5;
+      --ink: #1a1612;
+      --ink-light: #3d3530;
+      --muted: #7a6f66;
+      --rule: #d4c9be;
+      --accent: #8b3a2a;
+      --accent-light: #c4624f;
+      --tag-bg: #ede8e2;
+      --player-bg: #eee8e0;
+      --shadow: 0 2px 16px rgba(26,22,18,0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--warm-white);
+      border-bottom: 1px solid var(--rule);
+      padding: 56px 24px 48px;
+      text-align: center;
+    }
+
+    .venue-tag {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--tag-bg);
+      border: 1px solid var(--rule);
+      padding: 4px 12px;
+      border-radius: 2px;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(26px, 4vw, 42px);
+      font-weight: 600;
+      line-height: 1.25;
+      max-width: 820px;
+      margin: 0 auto 16px;
+      color: var(--ink);
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .authors {
+      font-family: 'Source Serif 4', serif;
+      font-size: 15px;
+      color: var(--muted);
+      font-style: italic;
+      margin-bottom: 8px;
+    }
+
+    .blind-note {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Layout ── */
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ── Section headings ── */
+    .section {
+      margin-top: 64px;
+    }
+
+    .section-rule {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .section-rule h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 600;
+      white-space: nowrap;
+      color: var(--ink);
+    }
+
+    .section-rule::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--rule);
+    }
+
+    /* ── Abstract ── */
+    .abstract-box {
+      background: var(--warm-white);
+      border-left: 3px solid var(--accent);
+      padding: 24px 28px;
+      font-size: 15.5px;
+      line-height: 1.75;
+      color: var(--ink-light);
+    }
+
+    /* ── Architecture figure ── */
+    .figure-wrap {
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    .figure-placeholder {
+      background: var(--player-bg);
+      border: 2px dashed var(--rule);
+      border-radius: 4px;
+      padding: 60px 32px;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .figure-placeholder svg {
+      opacity: 0.35;
+    }
+
+    .figure-img {
+      max-width: 100%;
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      box-shadow: var(--shadow);
+    }
+
+    figcaption {
+      margin-top: 12px;
+      font-size: 14px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* ── Audio tables ── */
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    thead tr {
+      border-bottom: 2px solid var(--ink);
+    }
+
+    thead th {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      font-weight: 500;
+      text-transform: uppercase;
+      padding: 10px 14px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    thead th:first-child {
+      text-align: left;
+      color: var(--ink);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--rule);
+      transition: background 0.15s;
+    }
+
+    tbody tr:hover {
+      background: var(--warm-white);
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    tbody td {
+      padding: 10px 14px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    tbody td:first-child {
+      text-align: left;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    .condition-label {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .condition-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .condition-desc {
+      font-family: 'Source Serif 4', serif;
+      font-size: 12px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* highlight our model */
+    tr.ours td:first-child .condition-name {
+      color: var(--accent);
+    }
+
+    tr.ours td:first-child::before {
+      content: '★ ';
+      color: var(--accent);
+      font-size: 11px;
+    }
+
+    /* ── Audio player slot ── */
+    .audio-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    audio {
+      width: 130px;
+      height: 32px;
+      accent-color: var(--accent);
+    }
+
+    /* Placeholder when no audio yet */
+    .audio-placeholder {
+      width: 130px;
+      height: 32px;
+      background: var(--player-bg);
+      border: 1px dashed var(--rule);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Sub-section label ── */
+    .sub-label {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 17px;
+      color: var(--ink-light);
+      margin: 36px 0 14px;
+      padding-left: 2px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 32px 24px;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Note box ── */
+    .note {
+      background: var(--tag-bg);
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      padding: 14px 18px;
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 16px;
+      font-style: italic;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      audio { width: 100px; }
+      .audio-placeholder { width: 100px; }
+      h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="venue-tag">ISMIR 2025 · Double-Blind Submission</div>
+  <h1>VioLM: A Neural Language Model for<br><em>Violin Synthesis</em> with Articulation</h1>
+  <p class="authors">Anonymous Authors</p>
+  <p class="blind-note">Anonymous Affiliations &nbsp;·&nbsp; anonymous@ismir.net</p>
+</header>
+
+<main>
+
+  <!-- Abstract -->
+  <section class="section">
+    <div class="section-rule"><h2>Abstract</h2></div>
+    <div class="abstract-box">
+      Music performance synthesis (MPS) for musical instruments remains challenging due to insufficient expressive datasets and limited modeling of instrument-specific playing techniques. In particular, many instruments such as the violin require handling multiple articulations with heterogeneous and distinct physical excitation mechanisms, while existing neural network-based MPS models largely ignore such distinctions. We propose <strong>VioLM</strong>, a language-model-based violin synthesis framework that generates expressive audio from MIDI scores with articulation labels. To address data scarcity, VioLM combines an expressive data generation pipeline with a two-stage transfer learning strategy. Specifically, we first adapt a pre-trained piano-based VALL-E model to the violin domain using synthetic data, and then further improve audio fidelity by fine-tuning the model on a small set of real violin performances using LoRA. Experimental results demonstrate that VioLM improves generation quality on the evaluated cases, presenting the first neural network-based MPS system with explicit control over violin articulations.
+    </div>
+  </section>
+
+  <!-- Architecture -->
+  <section class="section">
+    <div class="section-rule"><h2>System Architecture</h2></div>
+    <figure class="figure-wrap">
+      <!--
+        Replace the placeholder below with your figure:
+        <img class="figure-img" src="imgs/architecture.png" alt="VioLM Architecture" />
+      -->
+      <div class="figure-placeholder">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+        </svg>
+        <span>[ Place architecture figure here ]</span>
+        <span style="font-size:11px">Replace with: &lt;img src="imgs/architecture.png"&gt;</span>
+      </div>
+      <figcaption>Figure 1: Architecture of the VioLM model. The system adapts a pre-trained piano VALL-E model to violin synthesis via two-stage transfer learning with articulation conditioning.</figcaption>
+    </figure>
+  </section>
+
+  <!-- Main comparison -->
+  <section class="section">
+    <div class="section-rule"><h2>Synthesis Quality Comparison</h2></div>
+    <p style="color:var(--ink-light); font-size:15px; margin-bottom:8px;">
+      Seven samples drawn from the test set. Each sample is rendered by all conditions. ★ denotes the proposed model.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Condition</th>
+            <th>Sample 1</th>
+            <th>Sample 2</th>
+            <th>Sample 3</th>
+            <th>Sample 4</th>
+            <th>Sample 5</th>
+            <th>Sample 6</th>
+            <th>Sample 7</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- Reference -->
+          <tr>
+            <td>
+              <div class="condition-label">
+                <span class="condition-name">Reference</span>
+                <span class="condition-desc">Real violin recording</span>
+              </div>
+            </td>
+            <td><audio controls preload="none" src="audio/trial_002/reference.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_008/reference.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_009/reference.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_011/reference.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_015/reference.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_017/reference.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_019/reference.mp3"></audio></td>
+          </tr>
+
+          <!-- Arti-SFT (proposed) -->
+          <tr class="ours">
+            <td>
+              <div class="condition-label">
+                <span class="condition-name">Arti-SFT</span>
+                <span class="condition-desc">VioLM with articulation + LoRA fine-tuning</span>
+              </div>
+            </td>
+            <td><audio controls preload="none" src="audio/trial_002/arti-sft.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_008/arti-sft.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_009/arti-sft.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_011/arti-sft.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_015/arti-sft.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_017/arti-sft.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_019/arti-sft.mp3"></audio></td>
+          </tr>
+
+          <!-- No-Arti-SFT -->
+          <tr>
+            <td>
+              <div class="condition-label">
+                <span class="condition-name">No-Arti-SFT</span>
+                <span class="condition-desc">VioLM without articulation, with LoRA fine-tuning</span>
+              </div>
+            </td>
+            <td><audio controls preload="none" src="audio/trial_002/no-arti-sft.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_008/no-arti-sft.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_009/no-arti-sft.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_011/no-arti-sft.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_015/no-arti-sft.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_017/no-arti-sft.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_019/no-arti-sft.mp3"></audio></td>
+          </tr>
+
+          <!-- Arti (no SFT) -->
+          <tr>
+            <td>
+              <div class="condition-label">
+                <span class="condition-name">Arti</span>
+                <span class="condition-desc">Articulation conditioning only, no LoRA fine-tuning</span>
+              </div>
+            </td>
+            <td><audio controls preload="none" src="audio/trial_002/arti.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_008/arti.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_009/arti.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_011/arti.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_015/arti.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_017/arti.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_019/arti.mp3"></audio></td>
+          </tr>
+
+          <!-- No-Arti -->
+          <tr>
+            <td>
+              <div class="condition-label">
+                <span class="condition-name">No-Arti</span>
+                <span class="condition-desc">No articulation, no LoRA fine-tuning</span>
+              </div>
+            </td>
+            <td><audio controls preload="none" src="audio/trial_002/no-arti.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_008/no-arti.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_009/no-arti.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_011/no-arti.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_015/no-arti.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_017/no-arti.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_019/no-arti.mp3"></audio></td>
+          </tr>
+
+          <!-- MIDI Player -->
+          <tr>
+            <td>
+              <div class="condition-label">
+                <span class="condition-name">MIDI Player</span>
+                <span class="condition-desc">Rule-based MIDI rendering</span>
+              </div>
+            </td>
+            <td><audio controls preload="none" src="audio/trial_002/midi_player.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_008/midi_player.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_009/midi_player.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_011/midi_player.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_015/midi_player.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_017/midi_player.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_019/midi_player.mp3"></audio></td>
+          </tr>
+
+          <!-- ViolinDiff -->
+          <tr>
+            <td>
+              <div class="condition-label">
+                <span class="condition-name">ViolinDiff</span>
+                <span class="condition-desc">Diffusion-based baseline</span>
+              </div>
+            </td>
+            <td><audio controls preload="none" src="audio/trial_002/violindiff.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_008/violindiff.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_009/violindiff.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_011/violindiff.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_015/violindiff.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_017/violindiff.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_019/violindiff.mp3"></audio></td>
+          </tr>
+
+          <!-- Anchor -->
+          <tr>
+            <td>
+              <div class="condition-label">
+                <span class="condition-name">Anchor</span>
+                <span class="condition-desc">Low-quality anchor (listening-test reference)</span>
+              </div>
+            </td>
+            <td><audio controls preload="none" src="audio/trial_002/anchor.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_008/anchor.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_009/anchor.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_011/anchor.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_015/anchor.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_017/anchor.mp3"></audio></td>
+            <td><audio controls preload="none" src="audio/trial_019/anchor.mp3"></audio></td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- References -->
+  <section class="section">
+    <div class="section-rule"><h2>References</h2></div>
+    <p style="color:var(--muted); font-style:italic; font-size:15px;">
+      Omitted for double-blind peer review. References will be provided upon acceptance.
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  © 2025 &nbsp;·&nbsp; Submitted to ISMIR 2025 &nbsp;·&nbsp; Double-blind review — author information withheld
+</footer>
+
+</body>
+</html>
